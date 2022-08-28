@@ -5,10 +5,10 @@ import { getResponseData } from "../model";
 
 import ChinaClient from "../services/chinaClient";
 
-@CONTROLLER()
+@CONTROLLER('/kline')
 export class KLineController {
-  @GET("/kline")
-  async example(ctx: Context) {
+  @GET("/sina")
+  async sina(ctx: Context) {
     const { symbol, interval, limit } = ctx.query;
 
     const res = await firstValueFrom(

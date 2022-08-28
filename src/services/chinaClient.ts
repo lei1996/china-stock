@@ -29,7 +29,7 @@ class ChinaClient {
    */
   fetchSZDaykLine(code: string) {
     return this.shenZhenStockClient.fetchDaykData(code).pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((items: any[][]) =>
         from(items).pipe(
           map(([date, open, close, low, high, _1, _2, volume]) => ({
@@ -42,7 +42,10 @@ class ChinaClient {
           }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -51,13 +54,16 @@ class ChinaClient {
    */
   fetchSZEquityData() {
     return this.shenZhenStockClient.fetchEquityData().pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({ code: x["A股代码"], name: x["A股简称"] }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -66,13 +72,16 @@ class ChinaClient {
    */
   fetchSZConvertibleBondData() {
     return this.shenZhenStockClient.fetchConvertibleBondData().pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({ code: x["证券代码"], name: x["证券简称"] }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -81,7 +90,7 @@ class ChinaClient {
    */
   fetchSZFwrData() {
     return this.shenZhenStockClient.fetchFwrData().pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({
@@ -95,7 +104,10 @@ class ChinaClient {
           }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -103,9 +115,13 @@ class ChinaClient {
    * 获取上海交易所 股票 日k线
    */
   fetchSHDaykLine(code: string, begin: number = -50, end: number = -1) {
-    return this.shanghaiStockClient
-      .fetchDaykData(code, begin, end)
-      .pipe(delay(5 * 1000), retry(3));
+    return this.shanghaiStockClient.fetchDaykData(code, begin, end).pipe(
+      delay(750),
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
+    );
   }
 
   /**
@@ -113,9 +129,12 @@ class ChinaClient {
    */
   fetchSHEquityData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchEquityData(begin, end).pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -124,9 +143,12 @@ class ChinaClient {
    */
   fetchFwrData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchFwrData(begin, end).pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -135,9 +157,12 @@ class ChinaClient {
    */
   fetchBondData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchBondData(begin, end).pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -146,9 +171,12 @@ class ChinaClient {
    */
   fetchIndexData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchIndexData(begin, end).pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -167,7 +195,7 @@ class ChinaClient {
         )
         .then((x) => x.data)
     ).pipe(
-      delay(5 * 1000),
+      delay(750),
       concatMap((items: any[]) =>
         from(items).pipe(
           map(({ day, ...rest }) => ({
@@ -176,7 +204,10 @@ class ChinaClient {
           }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 }
