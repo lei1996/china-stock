@@ -121,10 +121,10 @@ class ChinaClient {
         from(x.kline as number[][]).pipe(
           map(([date, open, high, low, close, volume]) => ({
             id: new Date(
-                `${date.toString().slice(0, 4)}-${date
-                  .toString()
-                  .slice(4, 6)}-${date.toString().slice(-2)}`
-              ).getTime(),
+              `${date.toString().slice(0, 4)}-${date
+                .toString()
+                .slice(4, 6)}-${date.toString().slice(-2)}`
+            ).getTime(),
             open,
             close,
             high,
@@ -146,7 +146,9 @@ class ChinaClient {
   fetchSHEquityData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchEquityData(begin, end).pipe(
       delay(750),
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -160,7 +162,9 @@ class ChinaClient {
   fetchFwrData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchFwrData(begin, end).pipe(
       delay(750),
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -174,7 +178,9 @@ class ChinaClient {
   fetchBondData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchBondData(begin, end).pipe(
       delay(750),
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -188,7 +194,9 @@ class ChinaClient {
   fetchIndexData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchIndexData(begin, end).pipe(
       delay(750),
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
