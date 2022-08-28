@@ -117,6 +117,22 @@ class ChinaClient {
   fetchSHDaykLine(code: string, begin: number = -50, end: number = -1) {
     return this.shanghaiStockClient.fetchDaykData(code, begin, end).pipe(
       delay(750),
+      concatMap((x) =>
+        from(x.kline as number[][]).pipe(
+          map(([date, open, high, low, close, volume]) => ({
+            id: new Date(
+                `${date.toString().slice(0, 4)}-${date
+                  .toString()
+                  .slice(4, 6)}-${date.toString().slice(-2)}`
+              ).getTime(),
+            open,
+            close,
+            high,
+            low,
+            volume,
+          }))
+        )
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
