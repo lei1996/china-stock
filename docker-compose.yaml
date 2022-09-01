@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  china-stock:
+    image: china-stock
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./src:/usr/app/server/src
+    ports:
+      - '127.0.0.1:7777:7777'
+    restart: unless-stopped

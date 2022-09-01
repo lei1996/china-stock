@@ -29,6 +29,7 @@ class ChinaClient {
    */
   fetchSZDaykLine(code: string) {
     return this.shenZhenStockClient.fetchDaykData(code).pipe(
+      delay(750),
       concatMap((items: any[][]) =>
         from(items).pipe(
           map(([date, open, close, low, high, _1, _2, volume]) => ({
@@ -53,6 +54,7 @@ class ChinaClient {
    */
   fetchSZEquityData() {
     return this.shenZhenStockClient.fetchEquityData().pipe(
+      delay(750),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({ code: x["A股代码"], name: x["A股简称"] }))
@@ -70,6 +72,7 @@ class ChinaClient {
    */
   fetchSZConvertibleBondData() {
     return this.shenZhenStockClient.fetchConvertibleBondData().pipe(
+      delay(750),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({ code: x["证券代码"], name: x["证券简称"] }))
@@ -87,6 +90,7 @@ class ChinaClient {
    */
   fetchSZFwrData() {
     return this.shenZhenStockClient.fetchFwrData().pipe(
+      delay(750),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({
@@ -112,6 +116,23 @@ class ChinaClient {
    */
   fetchSHDaykLine(code: string, begin: number = -50, end: number = -1) {
     return this.shanghaiStockClient.fetchDaykData(code, begin, end).pipe(
+      delay(750),
+      concatMap((x) =>
+        from(x.kline as number[][]).pipe(
+          map(([date, open, high, low, close, volume]) => ({
+            id: new Date(
+              `${date.toString().slice(0, 4)}-${date
+                .toString()
+                .slice(4, 6)}-${date.toString().slice(-2)}`
+            ).getTime(),
+            open,
+            close,
+            high,
+            low,
+            volume,
+          }))
+        )
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -124,7 +145,10 @@ class ChinaClient {
    */
   fetchSHEquityData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchEquityData(begin, end).pipe(
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      delay(750),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -137,7 +161,10 @@ class ChinaClient {
    */
   fetchFwrData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchFwrData(begin, end).pipe(
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      delay(750),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -150,7 +177,10 @@ class ChinaClient {
    */
   fetchBondData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchBondData(begin, end).pipe(
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      delay(750),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -163,7 +193,10 @@ class ChinaClient {
    */
   fetchIndexData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchIndexData(begin, end).pipe(
-      concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
+      delay(750),
+      concatMap((x) =>
+        from(x.list as string[][]).pipe(map(([code, name]) => ({ code, name })))
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
@@ -186,6 +219,7 @@ class ChinaClient {
         )
         .then((x) => x.data)
     ).pipe(
+      delay(750),
       concatMap((items: any[]) =>
         from(items).pipe(
           map(({ day, ...rest }) => ({
