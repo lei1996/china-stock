@@ -1,5 +1,5 @@
 import axios from "axios";
-import { concatMap, defer, delay, from, map, retry } from "rxjs";
+import { concatMap, defer, delay, from, map, of, retry } from "rxjs";
 import { ShanghaiStockClient, ShenZhenStockClient } from "rxjs-china-stock";
 
 class ChinaClient {
@@ -29,7 +29,6 @@ class ChinaClient {
    */
   fetchSZDaykLine(code: string) {
     return this.shenZhenStockClient.fetchDaykData(code).pipe(
-      delay(5 * 1000),
       concatMap((items: any[][]) =>
         from(items).pipe(
           map(([date, open, close, low, high, _1, _2, volume]) => ({
@@ -42,7 +41,10 @@ class ChinaClient {
           }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -51,13 +53,15 @@ class ChinaClient {
    */
   fetchSZEquityData() {
     return this.shenZhenStockClient.fetchEquityData().pipe(
-      delay(5 * 1000),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({ code: x["A股代码"], name: x["A股简称"] }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -66,13 +70,15 @@ class ChinaClient {
    */
   fetchSZConvertibleBondData() {
     return this.shenZhenStockClient.fetchConvertibleBondData().pipe(
-      delay(5 * 1000),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({ code: x["证券代码"], name: x["证券简称"] }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -81,7 +87,6 @@ class ChinaClient {
    */
   fetchSZFwrData() {
     return this.shenZhenStockClient.fetchFwrData().pipe(
-      delay(5 * 1000),
       concatMap((lists) =>
         from(lists).pipe(
           map((x: any) => ({
@@ -95,7 +100,10 @@ class ChinaClient {
           }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -103,9 +111,12 @@ class ChinaClient {
    * 获取上海交易所 股票 日k线
    */
   fetchSHDaykLine(code: string, begin: number = -50, end: number = -1) {
-    return this.shanghaiStockClient
-      .fetchDaykData(code, begin, end)
-      .pipe(delay(5 * 1000), retry(3));
+    return this.shanghaiStockClient.fetchDaykData(code, begin, end).pipe(
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
+    );
   }
 
   /**
@@ -113,9 +124,11 @@ class ChinaClient {
    */
   fetchSHEquityData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchEquityData(begin, end).pipe(
-      delay(5 * 1000),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -124,9 +137,11 @@ class ChinaClient {
    */
   fetchFwrData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchFwrData(begin, end).pipe(
-      delay(5 * 1000),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -135,9 +150,11 @@ class ChinaClient {
    */
   fetchBondData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchBondData(begin, end).pipe(
-      delay(5 * 1000),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -146,9 +163,11 @@ class ChinaClient {
    */
   fetchIndexData(begin: number = 0, end: number = 9999999) {
     return this.shanghaiStockClient.fetchIndexData(begin, end).pipe(
-      delay(5 * 1000),
       concatMap((x) => from(x.list).pipe(map((x: any) => x[0]))),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 
@@ -167,7 +186,6 @@ class ChinaClient {
         )
         .then((x) => x.data)
     ).pipe(
-      delay(5 * 1000),
       concatMap((items: any[]) =>
         from(items).pipe(
           map(({ day, ...rest }) => ({
@@ -176,7 +194,42 @@ class ChinaClient {
           }))
         )
       ),
-      retry(3)
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
+    );
+  }
+
+  /**
+   * 获取东方财富股票接口数据
+   * @param symbol 品种名称
+   * @param interval 时间间隔
+   * @param limit 条数
+   * @returns
+   */
+  fetchEastKLine(symbol: string) {
+    return defer(() =>
+      axios
+        .get(
+          `https://push2.eastmoney.com/api/qt/stock/trends2/get?secid=${symbol}&fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ut=fa5fd1943c7b386f172d6893dbfba10b&iscr=0&cb=cb_1661993173433_99647406&isqhquote=&cb_1661993173433_99647406=cb_1661993173433_99647406`
+        )
+        .then((x) => x.data)
+    ).pipe(
+      concatMap(x => of(x.data.trends)),
+      concatMap((items: any[]) =>
+        from(items).pipe(
+          map(x => x.split(',')),
+          // map(({ day, ...rest }) => ({
+          //   id: new Date(day).getTime(),
+          //   ...rest,
+          // }))
+        )
+      ),
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
     );
   }
 }
