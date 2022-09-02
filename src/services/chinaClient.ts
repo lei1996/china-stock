@@ -261,7 +261,7 @@ class ChinaClient {
         from(x.data.klines as string[]).pipe(
           map((x) => x.split(",")),
           map(([id, open, close, high, low, volume]) => ({
-            id: new Date(id).getTime(),
+            id: new Date(id).getTime() - 1000 * 60 * 60 * 8,
             open: +open,
             close: +close,
             high: +high,
