@@ -242,7 +242,12 @@ class ChinaClient {
    * @param limit 条数
    * @returns
    */
-  fetchEastKLine(symbol: string, interval: string, begin: string, end: string = '20500101') {
+  fetchEastKLine(
+    symbol: string,
+    interval: string,
+    begin: string,
+    end: string = "20500101"
+  ) {
     return defer(() =>
       axios
         .get(
@@ -251,18 +256,20 @@ class ChinaClient {
         .then((x) => x.data)
     ).pipe(
       delay(750),
-      filter(x => !!x.data),
-      concatMap(x => from(x.data.klines as string[]).pipe(
-        map((x)=> x.split(',')),
-        map(([id, open, close, high, low, volume]) => ({
-          id: new Date(id).getTime(),
-          open: +open,
-          close: +close,
-          high: +high,
-          low: +low,
-          volume: +volume,
-        }))
-      )),
+      filter((x) => !!x.data),
+      concatMap((x) =>
+        from(x.data.klines as string[]).pipe(
+          map((x) => x.split(",")),
+          map(([id, open, close, high, low, volume]) => ({
+            id: new Date(id).getTime(),
+            open: +open,
+            close: +close,
+            high: +high,
+            low: +low,
+            volume: +volume,
+          }))
+        )
+      ),
       retry({
         count: 3,
         delay: 5 * 1000,
