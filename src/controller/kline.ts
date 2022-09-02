@@ -22,14 +22,28 @@ export class KLineController {
     ctx.body = getResponseData(res);
   }
 
+  @GET("/east")
+  async east(ctx: Context) {
+    const { symbol, interval, begin, end } = ctx.query;
+
+    const res = await firstValueFrom(
+      ChinaClient.fetchEastKLine(
+        symbol as string,
+        interval as string,
+        begin as string,
+        end as string
+      ).pipe(toArray())
+    );
+
+    ctx.body = getResponseData(res);
+  }
+
   @GET("/sh")
   async sh(ctx: Context) {
     const { symbol } = ctx.query;
 
     const res = await firstValueFrom(
-      ChinaClient.fetchSHDaykLine(
-        symbol as string,
-      ).pipe(toArray())
+      ChinaClient.fetchSHDaykLine(symbol as string).pipe(toArray())
     );
 
     ctx.body = getResponseData(res);

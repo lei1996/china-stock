@@ -1,5 +1,5 @@
 import axios from "axios";
-import { concatMap, defer, delay, from, map, retry } from "rxjs";
+import { concatMap, defer, delay, filter, from, map, retry } from "rxjs";
 import { ShanghaiStockClient, ShenZhenStockClient } from "rxjs-china-stock";
 
 class ChinaClient {
@@ -228,6 +228,41 @@ class ChinaClient {
           }))
         )
       ),
+      retry({
+        count: 3,
+        delay: 5 * 1000,
+      })
+    );
+  }
+
+  /**
+   * 获取东方财富股票接口数据
+   * @param symbol 品种名称
+   * @param interval 时间间隔
+   * @param limit 条数
+   * @returns
+   */
+  fetchEastKLine(symbol: string, interval: string, begin: string, end: string = '20500101') {
+    return defer(() =>
+      axios
+        .get(
+          `https://push2his.eastmoney.com/api/qt/stock/kline/get?fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&beg=${begin}&end=${end}&ut=fa5fd1943c7b386f172d6893dbfba10b&rtntype=6&secid=${symbol}&klt=${interval}&fqt=`
+        )
+        .then((x) => x.data)
+    ).pipe(
+      delay(750),
+      filter(x => !!x.data),
+      concatMap(x => from(x.data.klines as string[]).pipe(
+        map((x)=> x.split(',')),
+        map(([id, open, close, high, low, volume]) => ({
+          id: new Date(id).getTime(),
+          open: +open,
+          close: +close,
+          high: +high,
+          low: +low,
+          volume: +volume,
+        }))
+      )),
       retry({
         count: 3,
         delay: 5 * 1000,
